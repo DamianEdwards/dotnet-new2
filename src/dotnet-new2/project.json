@@ -1,0 +1,50 @@
+﻿{
+  "version": "1.0.0-*",
+  "description": "dotnet-new2 Console Application",
+  "authors": [ "Damian Edwards" ],
+  "tags": [ "" ],
+  "projectUrl": "https://github.com/DamianEdwards/dotnet-new2",
+  "licenseUrl": "https://github.com/DamianEdwards/dotnet-new2/LICENSE",
+
+  "compilationOptions": {
+    "emitEntryPoint": true
+  },
+
+  "dependencies": {
+    "NETStandard.Library": "1.5.0-rc2-23911",
+    "Newtonsoft.Json": "8.0.2",
+    "NuGet.CommandLine.XPlat": "3.4.0-rtm-0764",
+    "System.CommandLine": "0.1.0-e160119-1",
+    "Microsoft.DotNet.ProjectModel": "1.0.0-*",
+    "Microsoft.DotNet.Cli.Utils": "1.0.0-*",
+    "Microsoft.Extensions.Logging": "1.0.0-rc2-16040",
+    "Microsoft.Extensions.Logging.Console": "1.0.0-rc2-16040",
+    "Microsoft.Extensions.PlatformAbstractions": "1.0.0-rc2-16537",
+    "Microsoft.Extensions.CommandLineUtils.Sources": {
+      "type": "build",
+      "version": "1.0.0-rc2-16453"
+    },
+    "Microsoft.Dnx.Runtime.CommandParsing.Sources": {
+      "version": "1.0.0-rc2-16453",
+      "type": "build"
+    },
+    "Microsoft.Dnx.Runtime.Sources": {
+      "version": "1.0.0-rc2-16453",
+      "type": "build"
+    },
+    "Microsoft.NETCore.ConsoleHost": "1.0.0-rc2-23911"
+  },
+
+  "commands": {
+    "dotnet_new2": "dotnet_new2"
+  },
+
+  "frameworks": {
+    "netstandardapp1.5": {
+      "imports": [
+        "dnxcore50",
+        "portable-net45+win8"
+      ]
+    }
+  }
+}

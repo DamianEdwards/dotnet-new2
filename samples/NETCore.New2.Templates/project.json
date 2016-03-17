@@ -1,0 +1,15 @@
+﻿{
+  "version": "1.0.0-*",
+  "description": "NETCore.New2.Templates Class Library",
+  "authors": [ "Damian Edwards" ],
+  "tags": [ "" ],
+  "projectUrl": "",
+  "licenseUrl": "",
+  "compileExclude": "templates/**/*.*",
+  "packInclude": {
+    "templates/": "templates/**/*.*"
+  },
+  "frameworks": {
+    "netstandard1.5": { }
+  }
+}

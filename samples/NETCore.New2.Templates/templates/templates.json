@@ -1,0 +1,21 @@
+﻿{
+  "sdkVersion": "0.1",
+  "projectTemplates": {
+    "console": {
+      "title": "Console Application",
+      "children": {
+        "csharp": {
+          "title": "Console Application (C#)"
+        }
+      }
+    },
+    "classlib": {
+      "title": "Class Library",
+      "children": {
+        "csharp": {
+          "title": "Class Library (C#)"
+        }
+      }
+    }
+  }
+}

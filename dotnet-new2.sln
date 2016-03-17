@@ -1,0 +1,39 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 14
+VisualStudioVersion = 14.0.24720.0
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{AF7EEF59-3C47-4BE1-B811-FDE44882A227}"
+EndProject
+Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "dotnet-new2", "src\dotnet-new2\dotnet-new2.xproj", "{103C2820-3054-4D42-A8D2-629D443A832A}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{A8F351AE-992D-4FED-B0A2-578A8C90C925}"
+	ProjectSection(SolutionItems) = preProject
+		NuGet.Config = NuGet.Config
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "samples", "samples", "{5FCECAC2-00A3-4DE5-9B49-BDFDDF158304}"
+EndProject
+Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "NETCore.New2.Templates", "samples\NETCore.New2.Templates\NETCore.New2.Templates.xproj", "{7843F585-D331-4313-9176-256893B436D1}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{103C2820-3054-4D42-A8D2-629D443A832A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{103C2820-3054-4D42-A8D2-629D443A832A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{103C2820-3054-4D42-A8D2-629D443A832A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{103C2820-3054-4D42-A8D2-629D443A832A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7843F585-D331-4313-9176-256893B436D1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7843F585-D331-4313-9176-256893B436D1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{103C2820-3054-4D42-A8D2-629D443A832A} = {AF7EEF59-3C47-4BE1-B811-FDE44882A227}
+		{7843F585-D331-4313-9176-256893B436D1} = {5FCECAC2-00A3-4DE5-9B49-BDFDDF158304}
+	EndGlobalSection
+EndGlobal
