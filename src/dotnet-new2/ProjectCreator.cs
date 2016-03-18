@@ -10,15 +10,24 @@ namespace dotnet_new2
         {
             Directory.CreateDirectory(path);
 
+            if (Directory.GetFileSystemEntries(path).Length > 0)
+            {
+                // Files already exist in the directory
+                Console.WriteLine($"Directory {path} already contains files. Please specify a different project name.");
+                return false;
+            }
+
             foreach (var file in template.Files)
             {
                 var dest = Path.Combine(path, file.DestPath);
+
                 File.Copy(file.SourcePath, dest);
                 ProcessFile(dest, name);
             }
 
             Console.WriteLine();
             Console.WriteLine($"Created \"{name}\" in {path}");
+            Console.WriteLine();
 
             return true;
         }
