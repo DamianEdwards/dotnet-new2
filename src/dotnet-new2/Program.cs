@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Threading;
 using Microsoft.Dnx.Runtime.Common.CommandLine;
 
 namespace dotnet_new2
@@ -10,10 +12,24 @@ namespace dotnet_new2
     {
         public static int Main(string[] args)
         {
-            return new Program().Run(args);
+            if (args.Length > 0 && args[0] == "--debug")
+            {
+                args = args.Skip(1).ToArray();
+
+                Console.WriteLine($"Waiting for debugger to attach. Process ID {Process.GetCurrentProcess().Id}");
+
+                while (!Debugger.IsAttached)
+                {
+                    Thread.Sleep(100);
+                }
+            }
+
+            var templateManager = new TemplateManager();
+
+            return new Program().Run(args, templateManager);
         }
 
-        public int Run(string [] args)
+        public int Run(string [] args, TemplateManager templateManager)
         {
             var app = new CommandLineApplication();
             app.Name = "dotnet-new2";
@@ -27,7 +43,27 @@ namespace dotnet_new2
 
                 command.OnExecute(() =>
                 {
-                    ListInstalledTemplates();
+                    var packages = templateManager.GetInstalledTemplates();
+
+                    Console.WriteLine();
+
+                    foreach (var package in packages)
+                    {
+                        Console.WriteLine($"{package.Id} {package.Version}");
+
+                        if (package.Templates.Any())
+                        {
+                            var maxNameLength = package.Templates.Max(t => t.Name.Length);
+
+                            foreach (var template in package.Templates)
+                            {
+                                var padding = new string(' ', maxNameLength - template.Name.Length);
+                                Console.WriteLine($"  - {template.Name} {padding} [{template.Path}]");
+                            }
+                        }
+                    }
+
+                    Console.WriteLine();
 
                     return 0;
                 });
@@ -50,7 +86,7 @@ namespace dotnet_new2
                         return 2;
                     }
 
-                    InstallTemplate(idArg.Value, versionArg.Value);
+                    templateManager.InstallTemplatePackage(idArg.Value, versionArg.Value);
 
                     return 0;
                 });
@@ -72,7 +108,7 @@ namespace dotnet_new2
                         return 2;
                     }
 
-                    UninstallTemplate(idArg.Value);
+                    templateManager.UninstallTemplatePackage(idArg.Value);
 
                     return 0;
                 });
@@ -84,7 +120,7 @@ namespace dotnet_new2
 
                 command.OnExecute(() =>
                 {
-                    RestoreTemplates();
+                    templateManager.RestoreTemplatePackages();
 
                     return 0;
                 });
@@ -110,28 +146,6 @@ namespace dotnet_new2
             });
 
             return app.Execute(args);
-        }
-
-        private void ListInstalledTemplates()
-        {
-            Console.WriteLine("TODO: List out installed templates");
-        }
-
-        private void InstallTemplate(string id, string version)
-        {
-            version = version ?? "[latest]";
-
-            Console.WriteLine($"TODO: Install template package {id} {version}");
-        }
-
-        private void UninstallTemplate(string id)
-        {
-            Console.WriteLine($"TODO: Uninstall template package {id}");
-        }
-
-        private void RestoreTemplates()
-        {
-            Console.WriteLine("TODO: Restore the installed template packages");
         }
 
         private void ShowMenu(string name)

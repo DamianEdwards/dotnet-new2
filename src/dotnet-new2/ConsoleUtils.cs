@@ -19,6 +19,14 @@ namespace dotnet_new2
                     Console.Write(key.KeyChar);
                     buffer.Add(key.KeyChar);
                 }
+                else if (key.Key == ConsoleKey.Backspace)
+                {
+                    if (buffer.Count > 0)
+                    {
+                        buffer.RemoveAt(buffer.Count - 1);
+                        Backspace(1);
+                    }
+                }
                 else if (key.Key == ConsoleKey.Enter)
                 {
                     if (!buffer.Any())
@@ -37,17 +45,22 @@ namespace dotnet_new2
                     }
 
                     // Number entered is invalid, clear the selection
-                    for (int i = 0; i < buffer.Count; i++)
-                    {
-                        Console.Write("\b"); // backspace
-                    }
-                    // BUG: Following code is throwing System.IO.IOException: The handle is invalid
-                    //Console.SetCursorPosition(Console.CursorLeft - buffer.Count, Console.CursorTop);
-                    //Console.Write(new string (' ', buffer.Count));
-                    //Console.SetCursorPosition(Console.CursorLeft - buffer.Count, Console.CursorTop);
+                    Backspace(buffer.Count);
                     buffer.Clear();
                 }
             }
+        }
+
+        public static void Backspace(int length)
+        {
+            Console.Write(new string('\b', length));
+            Console.Write(new string(' ', length));
+            Console.Write(new string('\b', length));
+
+            // BUG: Following code is throwing System.IO.IOException: The handle is invalid
+            //Console.SetCursorPosition(Console.CursorLeft - buffer.Count, Console.CursorTop);
+            //Console.Write(new string (' ', buffer.Count));
+            //Console.SetCursorPosition(Console.CursorLeft - buffer.Count, Console.CursorTop);
         }
     }
 }

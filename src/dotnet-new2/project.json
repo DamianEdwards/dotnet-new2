@@ -12,11 +12,10 @@
 
   "dependencies": {
     "NETStandard.Library": "1.5.0-rc2-23911",
-    "Newtonsoft.Json": "8.0.2",
-    "NuGet.CommandLine.XPlat": "3.4.0-rtm-0764",
+    "Newtonsoft.Json": "7.0.1",
     "System.CommandLine": "0.1.0-e160119-1",
-    "Microsoft.DotNet.ProjectModel": "1.0.0-*",
-    "Microsoft.DotNet.Cli.Utils": "1.0.0-*",
+    "System.Runtime.Serialization.Primitives": "4.1.1-*",
+    "Microsoft.DotNet.ProjectModel": "1.0.0-beta-*",
     "Microsoft.Extensions.Logging": "1.0.0-rc2-16040",
     "Microsoft.Extensions.Logging.Console": "1.0.0-rc2-16040",
     "Microsoft.Extensions.PlatformAbstractions": "1.0.0-rc2-16537",
