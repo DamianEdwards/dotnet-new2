@@ -24,12 +24,27 @@ namespace dotnet_new2
                 }
             }
 
-            var templateManager = new TemplateManager();
-
-            return new Program().Run(args, templateManager);
+            try
+            {
+                return new Program(new TemplateManager(), new ProjectCreator()).Run(args);
+            }
+            catch (Exception ex)
+            {
+                Console.Error.WriteLine("FAIL: {0}", ex);
+                return 1;
+            }
         }
 
-        public int Run(string [] args, TemplateManager templateManager)
+        private readonly TemplateManager _templateManager;
+        private readonly ProjectCreator _projectCreator;
+
+        public Program(TemplateManager templateManager, ProjectCreator projectCreator)
+        {
+            _templateManager = templateManager;
+            _projectCreator = projectCreator;
+        }
+
+        public int Run(string [] args)
         {
             var app = new CommandLineApplication();
             app.Name = "dotnet-new2";
@@ -43,9 +58,13 @@ namespace dotnet_new2
 
                 command.OnExecute(() =>
                 {
-                    var packages = templateManager.GetInstalledTemplates();
+                    var packages = _templateManager.GetInstalledTemplates();
 
-                    Console.WriteLine();
+                    if (!packages.Any())
+                    {
+                        Console.WriteLine("No templates installed. Type 'dotnet new2 install --help' for help on installing templates.");
+                        return 0;
+                    }
 
                     foreach (var package in packages)
                     {
@@ -63,8 +82,6 @@ namespace dotnet_new2
                         }
                     }
 
-                    Console.WriteLine();
-
                     return 0;
                 });
             });
@@ -80,13 +97,17 @@ namespace dotnet_new2
 
                 command.OnExecute(() =>
                 {
-                    if (idArg.Value == null)
+                    if (idArg.Value == null || versionArg.Value == null)
                     {
+                        // TODO: Support not having to pass the version in (likely requires NuGet API support)
                         command.ShowHelp();
                         return 2;
                     }
 
-                    templateManager.InstallTemplatePackage(idArg.Value, versionArg.Value);
+                    if (!_templateManager.InstallTemplatePackage(idArg.Value, versionArg.Value))
+                    {
+                        return 1;
+                    }
 
                     return 0;
                 });
@@ -94,7 +115,7 @@ namespace dotnet_new2
 
             app.Command("uninstall", command =>
             {
-                command.Description = "Uninstalls a templates package";
+                command.Description = "Uninstalls a template package";
 
                 var idArg = command.Argument("[PackageId]", "The ID of the template package");
 
@@ -108,7 +129,10 @@ namespace dotnet_new2
                         return 2;
                     }
 
-                    templateManager.UninstallTemplatePackage(idArg.Value);
+                    if (!_templateManager.UninstallTemplatePackage(idArg.Value))
+                    {
+                        return 1;
+                    }
 
                     return 0;
                 });
@@ -120,8 +144,13 @@ namespace dotnet_new2
 
                 command.OnExecute(() =>
                 {
-                    templateManager.RestoreTemplatePackages();
+                    if (!_templateManager.RestoreTemplatePackages())
+                    {
+                        Console.WriteLine("Error restoring templates.");
+                        return 1;
+                    }
 
+                    Console.WriteLine("Templates restored. Type 'dotnet new2 list' to list installed templates.");
                     return 0;
                 });
             });
@@ -132,15 +161,33 @@ namespace dotnet_new2
             app.OnExecute(() =>
             {
                 var name = nameOption.Value() ?? Directory.GetCurrentDirectory();
+                var templatePath = templateOption.Value();
+                Template template;
 
-                if (templateOption.Value() == null)
+                if (templatePath == null)
                 {
-                    ShowMenu(name);
-
-                    return 0;
+                    template = PromptForTemplate(name);
+                    if (template == null)
+                    {
+                        Console.WriteLine("No templates installed. Type 'dotnet new2 install --help' for help on installing templates.");
+                        return 1;
+                    }
+                }
+                else
+                {
+                    template = _templateManager.GetTemplate(templatePath);
+                    if (template == null)
+                    {
+                        Console.WriteLine($"The template {templatePath} wasn't found. Type 'dotnet new2 list' to list installed templates, or 'dotnet new2' to select from installed templates.");
+                        return 1;
+                    }
                 }
 
-                CreateProject(templateOption.Value(), name);
+                if (!_projectCreator.CreateProject(name, template))
+                {
+                    Console.WriteLine("Error creating project");
+                    return 1;
+                }
 
                 return 0;
             });
@@ -148,21 +195,27 @@ namespace dotnet_new2
             return app.Execute(args);
         }
 
-        private void ShowMenu(string name)
+        private Template PromptForTemplate(string name)
         {
-            // TODO: Make this recursive, and real, etc.
-            
-            Console.WriteLine("");
-            Console.WriteLine("");
+            var templates = _templateManager.GetInstalledTemplates().SelectMany(tp => tp.Templates).ToList();
+
+            if (templates.Count == 0)
+            {
+                return null;
+            }
+
+            // TODO: Make this support template hierarchies (recursion!)
+            Console.WriteLine();
             Console.WriteLine("Templates");
             Console.WriteLine("-----------------------------------------");
-            Console.WriteLine("TODO: Build and show the real templates menu");
-
-            var templates = GetInstalledTemplates();
+            
+            var maxNameLength = templates.Max(t => t.Name.Length);
 
             for (var i = 0; i < templates.Count; i++)
             {
-                Console.WriteLine($"{i+1}. {templates[i]}");
+                var template = templates[i];
+                var padding = new string(' ', maxNameLength - template.Name.Length);
+                Console.WriteLine($"{i+1}. {template.Name} {padding}[{template.Path}]");
             }
 
             Console.WriteLine();
@@ -172,23 +225,8 @@ namespace dotnet_new2
             var selection = ConsoleUtils.ReadInt(templates.Count);
 
             Console.WriteLine($"Selected template {templates[selection-1]}");
-        }
 
-        private void CreateProject(string template, string name)
-        {
-            Console.WriteLine($"TODO: Generate new project '{name}' using template '{template}'");
-        }
-
-        private List<string> GetInstalledTemplates()
-        {
-            // TODO: Build the templates list from the installed template packages
-
-            return new List<string>
-            {
-                "Console Application [console]",
-                "Class Library       [classlib]",
-                "ASP.NET Core        [aspnetcore]"
-            };
+            return templates[selection - 1];
         }
     }
 }

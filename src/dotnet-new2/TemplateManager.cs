@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Threading.Tasks;
 using Microsoft.DotNet.ProjectModel;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
@@ -13,11 +12,13 @@ namespace dotnet_new2
 {
     public class TemplateManager
     {
-        private readonly ProjectContext _templatesProjectContext;
-        private readonly Project _templatesProject;
+        private ProjectContext _templatesProjectContext;
+        private Project _templatesProject;
+
+        // TODO: Don't Console.Write from this class, pass in a logger to write to or something and use pretty colors
 
         public TemplateManager()
-            : this(GetTemplatesProject())
+            : this(GetTemplatesProject(GetDefaultTemplatesProjectFile()))
         {
 
         }
@@ -28,7 +29,7 @@ namespace dotnet_new2
             _templatesProject = templatesProjectContext.ProjectFile;
         }
 
-        public void InstallTemplatePackage(string packageId, string version)
+        public bool InstallTemplatePackage(string packageId, string version)
         {
             // TODO: Validate the package ID and version
 
@@ -42,7 +43,7 @@ namespace dotnet_new2
             {
                 // Already installed!
                 Console.WriteLine($"Template package {packageId} is already installed");
-                return;
+                return true;
             }
 
             dependencies.Add(packageId, new JValue(version));
@@ -55,10 +56,16 @@ namespace dotnet_new2
                 // Error on restore! Rollback
                 var origJson = origProjectFile.ToString();
                 File.WriteAllText(_templatesProject.ProjectFilePath, origJson);
+
+                Console.WriteLine($"Error installing template package {packageId}");
+                return false;
             }
+
+            Console.WriteLine($"Template package {packageId} installed");
+            return true;
         }
 
-        public void UninstallTemplatePackage(string packageId)
+        public bool UninstallTemplatePackage(string packageId)
         {
             // Remove the dependency from the templates project file
             var projectFile = JObject.Parse(File.ReadAllText(_templatesProject.ProjectFilePath));
@@ -78,15 +85,24 @@ namespace dotnet_new2
                     // Error on restore! Rollback
                     var origJson = origProjectFile.ToString();
                     File.WriteAllText(_templatesProject.ProjectFilePath, origJson);
+
+                    Console.WriteLine($"Error uninstalling template package {packageId}");
+                    return false;
                 }
             }
 
-            Console.WriteLine();
             Console.WriteLine($"Template package {packageId} uninstalled");
+            return true;
         }
 
         public IEnumerable<TemplatePackage> GetInstalledTemplates()
         {
+            if (_templatesProjectContext.LockFile == null)
+            {
+                RestoreTemplatePackages();
+                ReloadTemplatesProject();
+            }
+
             var templatePackages = _templatesProjectContext.LockFile.PackageLibraries;
             var exporter = _templatesProjectContext.CreateExporter("Debug");
             var packages = exporter.GetAllExports().Select(e => e.Library).OfType<PackageDescription>();
@@ -128,20 +144,28 @@ namespace dotnet_new2
             return restore.ExitCode == 0;
         }
 
-        private static ProjectContext GetTemplatesProject()
+        private void ReloadTemplatesProject()
         {
-            //return null;
+            _templatesProjectContext = GetTemplatesProject(_templatesProjectContext.ProjectFile.ProjectFilePath);
+            _templatesProject = _templatesProjectContext.ProjectFile;
+        }
 
-            // TODO: Make this x-plat friendly
-            var path = GetTemplatesProjectFile();
+        internal Template GetTemplate(string path)
+        {
+            throw new NotImplementedException();
+        }
+
+        private static ProjectContext GetTemplatesProject(string path)
+        {   
             EnsureProjectFile(path);
             var templatesProject = ProjectContext.Create(path, NuGetFramework.Parse("netstandardapp1.5"));
 
             return templatesProject;
         }
 
-        private static string GetTemplatesProjectFile()
+        private static string GetDefaultTemplatesProjectFile()
         {
+            // TODO: Make this x-plat friendly
             var appdata = Environment.GetEnvironmentVariable("LOCALAPPDATA");
             var path = Path.Combine(appdata, "Microsoft", "dotnet", "cli", "data", "dotnet-new2", "templates", "project.json");
 
@@ -150,8 +174,14 @@ namespace dotnet_new2
 
         private static void EnsureProjectFile(string path)
         {
-            if (!File.Exists(GetTemplatesProjectFile()))
+            var directory = Path.GetDirectoryName(path);
+            if (!File.Exists(path))
             {
+                if (!Directory.Exists(directory))
+                {
+                    Directory.CreateDirectory(directory);
+                }
+
                 using (var file = File.CreateText(path))
                 {
                     file.WriteLine(

@@ -13,7 +13,10 @@ namespace dotnet_new2
 
             while (true)
             {
+                // TODO: Add support for selecting via arrow keys (uparrow +1 to max, downarrow -1 to 0)
+
                 var key = Console.ReadKey(true);
+
                 if (char.IsDigit(key.KeyChar))
                 {
                     Console.Write(key.KeyChar);
