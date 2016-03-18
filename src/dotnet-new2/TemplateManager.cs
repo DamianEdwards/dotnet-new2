@@ -124,6 +124,14 @@ namespace dotnet_new2
                         {
                             Name = c.Value["title"].ToString(),
                             Package = templatePackage,
+                            Files = package.Library.Files
+                                .Where(f => f.StartsWith("templates\\" + c.Name + "\\"))
+                                .Select(f => new TemplateFile
+                                {
+                                    SourcePath = Path.Combine(package.Path, f).Replace('\\', Path.DirectorySeparatorChar),
+                                    DestPath = f.Substring(("templates\\" + c.Name + "\\files\\").Length)
+                                })
+                                .ToList(),
                             Path = c.Name
                         });
 

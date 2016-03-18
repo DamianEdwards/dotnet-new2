@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
@@ -182,6 +182,7 @@ namespace dotnet_new2
                     }
                 }
 
+                string newProjectName;
                 string newProjectPath;
                 
                 if (nameOption.Value() == null)
@@ -189,20 +190,23 @@ namespace dotnet_new2
                     if (templateOption.Value() == null)
                     {
                         // User passed no args so we're in interactive mode
-                        newProjectPath = Path.Combine(Directory.GetCurrentDirectory(), PromptForName());
+                        newProjectName = PromptForName();
+                        newProjectPath = Path.Combine(Directory.GetCurrentDirectory(), newProjectName);
                     }
                     else
                     {
                         // User passed the template arg but no name arg so create project in current dir
                         newProjectPath = Directory.GetCurrentDirectory();
+                        newProjectName = newProjectPath.Split(Path.DirectorySeparatorChar).Last();
                     }
                 }
                 else
                 {
-                    newProjectPath = Path.Combine(Directory.GetCurrentDirectory(), nameOption.Value());
+                    newProjectName = nameOption.Value();
+                    newProjectPath = Path.Combine(Directory.GetCurrentDirectory(), newProjectName);
                 }
 
-                if (!_projectCreator.CreateProject(newProjectPath, template))
+                if (!_projectCreator.CreateProject(newProjectName, newProjectPath, template))
                 {
                     Console.WriteLine("Error creating project");
                     return 1;

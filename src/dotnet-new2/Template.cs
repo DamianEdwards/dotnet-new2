@@ -11,6 +11,8 @@ namespace dotnet_new2
 
         public string Path { get; set; }
 
+        public IList<TemplateFile> Files { get; set; } = new List<TemplateFile>();
+
         public TemplatePackage Package { get; set; }
     }
 }
