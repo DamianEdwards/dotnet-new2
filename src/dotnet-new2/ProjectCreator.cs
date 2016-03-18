@@ -4,9 +4,12 @@ namespace dotnet_new2
 {
     public class ProjectCreator
     {
-        public bool CreateProject(string name, Template template)
+        public bool CreateProject(string path, Template template)
         {
-            throw new NotImplementedException();
+            Console.WriteLine();
+            Console.WriteLine($"Creating project at {path} with template {template.Name}");
+
+            return true;
         }
     }
 }

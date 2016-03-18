@@ -152,7 +152,12 @@ namespace dotnet_new2
 
         internal Template GetTemplate(string path)
         {
-            throw new NotImplementedException();
+            var template = GetInstalledTemplates()
+                .SelectMany(p => p.Templates)
+                .Where(t => t.Path == path)
+                .FirstOrDefault();
+
+            return template;
         }
 
         private static ProjectContext GetTemplatesProject(string path)

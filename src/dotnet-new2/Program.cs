@@ -160,13 +160,12 @@ namespace dotnet_new2
 
             app.OnExecute(() =>
             {
-                var name = nameOption.Value() ?? Directory.GetCurrentDirectory();
                 var templatePath = templateOption.Value();
                 Template template;
 
                 if (templatePath == null)
                 {
-                    template = PromptForTemplate(name);
+                    template = PromptForTemplate();
                     if (template == null)
                     {
                         Console.WriteLine("No templates installed. Type 'dotnet new2 install --help' for help on installing templates.");
@@ -183,7 +182,27 @@ namespace dotnet_new2
                     }
                 }
 
-                if (!_projectCreator.CreateProject(name, template))
+                string newProjectPath;
+                
+                if (nameOption.Value() == null)
+                {
+                    if (templateOption.Value() == null)
+                    {
+                        // User passed no args so we're in interactive mode
+                        newProjectPath = Path.Combine(Directory.GetCurrentDirectory(), PromptForName());
+                    }
+                    else
+                    {
+                        // User passed the template arg but no name arg so create project in current dir
+                        newProjectPath = Directory.GetCurrentDirectory();
+                    }
+                }
+                else
+                {
+                    newProjectPath = Path.Combine(Directory.GetCurrentDirectory(), nameOption.Value());
+                }
+
+                if (!_projectCreator.CreateProject(newProjectPath, template))
                 {
                     Console.WriteLine("Error creating project");
                     return 1;
@@ -195,7 +214,7 @@ namespace dotnet_new2
             return app.Execute(args);
         }
 
-        private Template PromptForTemplate(string name)
+        private Template PromptForTemplate()
         {
             var templates = _templateManager.GetInstalledTemplates().SelectMany(tp => tp.Templates).ToList();
 
@@ -220,13 +239,26 @@ namespace dotnet_new2
 
             Console.WriteLine();
             Console.Write($"Select a template [1]: ");
-            Console.Write("");
 
             var selection = ConsoleUtils.ReadInt(templates.Count);
 
-            Console.WriteLine($"Selected template {templates[selection-1]}");
-
             return templates[selection - 1];
+        }
+
+        private string PromptForName()
+        {
+            var defaultName = "Project1";
+
+            Console.Write($"Enter a project name [{defaultName}]: ");
+
+            var name = Console.ReadLine();
+
+            if (string.IsNullOrWhiteSpace(name))
+            {
+                name = defaultName;
+            }
+
+            return name;
         }
     }
 }
