@@ -110,6 +110,8 @@ namespace dotnet_new2
             foreach (var package in packages)
             {
                 var manifestFile = package.Library.Files.SingleOrDefault(f => f == "templates\\templates.json");
+
+                // TODO: Handle other packages turning up in lock file due to template packages having dependencies
                 if (manifestFile != null)
                 {
                     var templatePackage = new TemplatePackage { Id = package.Identity.Name, Version = package.Identity.Version.ToString() };
