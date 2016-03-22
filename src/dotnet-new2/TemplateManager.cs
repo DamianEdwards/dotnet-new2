@@ -95,7 +95,7 @@ namespace dotnet_new2
             return true;
         }
 
-        public IEnumerable<TemplatePackage> GetInstalledTemplates()
+        public IList<TemplatePackage> GetInstalledTemplatePackages()
         {
             if (_templatesProjectContext.LockFile == null)
             {
@@ -106,7 +106,9 @@ namespace dotnet_new2
             var templatePackages = _templatesProjectContext.LockFile.PackageLibraries;
             var exporter = _templatesProjectContext.CreateExporter("Debug");
             var packages = exporter.GetAllExports().Select(e => e.Library).OfType<PackageDescription>();
-            
+
+            var result = new List<TemplatePackage>();
+
             foreach (var package in packages)
             {
                 var manifestFile = package.Library.Files.SingleOrDefault(f => f == "templates\\templates.json");
@@ -119,29 +121,29 @@ namespace dotnet_new2
                     var manifestFilePath = Path.Combine(package.Path, manifestFile).Replace('\\', Path.DirectorySeparatorChar);
                     var manifest = JObject.Parse(File.ReadAllText(manifestFilePath));
 
-                    var projectTemplates = manifest["projectTemplates"].Children<JProperty>();
+                    var manifestEntries = manifest["projectTemplates"].Children<JProperty>();
 
-                    var templates = projectTemplates.Select(c =>
-                        new Template
-                        {
-                            Name = c.Value["title"].ToString(),
-                            Package = templatePackage,
-                            Files = package.Library.Files
-                                .Where(f => f.StartsWith("templates\\" + c.Name + "\\"))
-                                .Select(f => new TemplateFile
-                                {
-                                    SourcePath = Path.Combine(package.Path, f).Replace('\\', Path.DirectorySeparatorChar),
-                                    DestPath = f.Substring(("templates\\" + c.Name + "\\files\\").Length)
-                                })
-                                .ToList(),
-                            Path = c.Name
-                        });
+                    templatePackage.Entries = manifestEntries
+                        .Select(e => ProcessManifestEntry(null, e, package, templatePackage))
+                        .ToList();
 
-                    templatePackage.Templates = templates.ToList();
-
-                    yield return templatePackage;
+                    result.Add(templatePackage);
                 }
             }
+
+            return result;
+        }
+
+        public IList<ManifestEntry> MergeManifestEntries(IList<TemplatePackage> templatePackages)
+        {
+            var entries = new List<ManifestEntry>(templatePackages.First().Entries);
+
+            foreach (var package in templatePackages.Skip(1))
+            {
+                MergeManifestEntries(package.Entries, entries);
+            }
+
+            return entries;
         }
 
         public bool RestoreTemplatePackages()
@@ -154,20 +156,107 @@ namespace dotnet_new2
             return restore.ExitCode == 0;
         }
 
+        public Template GetTemplate(string path)
+        {
+            var packages = GetInstalledTemplatePackages();
+
+            foreach (var package in packages)
+            {
+                var match = package.Find(t => t.Path == path);
+                if (match != null)
+                {
+                    return match;
+                }
+            }
+
+            return null;
+        }
+
         private void ReloadTemplatesProject()
         {
             _templatesProjectContext = GetTemplatesProject(_templatesProjectContext.ProjectFile.ProjectFilePath);
             _templatesProject = _templatesProjectContext.ProjectFile;
         }
 
-        internal Template GetTemplate(string path)
+        private static ManifestEntry ProcessManifestEntry(ManifestEntry parent, JProperty entry, PackageDescription package, TemplatePackage templatePackage)
         {
-            var template = GetInstalledTemplates()
-                .SelectMany(p => p.Templates)
-                .Where(t => t.Path == path)
-                .FirstOrDefault();
+            var title = entry.Value["title"].ToString();
+            var children = entry.Value["children"];
+            var path = parent == null ? entry.Name : Path.Combine(parent.Path, entry.Name);
 
-            return template;
+            if (children != null)
+            {
+                // Entry is a category
+                var category = new TemplateCategory
+                {
+                    Parent = parent,
+                    Path = path,
+                    Title = title
+                };
+                category.Children = children.Children<JProperty>()
+                    .Select(e => ProcessManifestEntry(category, e, package, templatePackage))
+                    .ToList();
+                return category;
+            }
+
+            // Entry is a template
+            
+            return new Template
+            {
+                Parent = parent,
+                Path = path,
+                Title = title,
+                Package = templatePackage,
+                Files = package.Library.Files
+                    .Where(f => f.StartsWith("templates\\" + path + "\\"))
+                    .Select(f => new TemplateFile
+                    {
+                        SourcePath = Path.Combine(package.Path, f).Replace('\\', Path.DirectorySeparatorChar),
+                        DestPath = f.Substring(("templates\\" + path + "\\files\\").Length)
+                    })
+                    .ToList()
+            };
+        }
+
+        private static void MergeManifestEntries(IList<ManifestEntry> source, IList<ManifestEntry> dest)
+        {
+            foreach (var entry in source)
+            {
+                var match = dest.FirstOrDefault(e => e.Path == entry.Path);
+                if (match != null)
+                {
+                    // Matching entry found, perform the merge
+                    var matchTemplate = match as Template;
+                    var matchCategory = match as TemplateCategory;
+                    var template = entry as Template;
+                    var category = entry as TemplateCategory;
+
+                    if (template != null)
+                    {
+                        // It's a template in the source so just add it to the dest as a dupe
+                        dest.Add(template);
+                    }
+                    else if (category != null)
+                    {
+                        // It's a category in the source
+                        if (matchCategory != null)
+                        {
+                            // Source and dest are both categories so merge them
+                            MergeManifestEntries(category.Children, matchCategory.Children);
+                        }
+                        else if (matchTemplate != null)
+                        {
+                            // Source is a category but dest is a template so just add the category as a dupe
+                            dest.Add(category);
+                        }
+                    }
+                }
+                else
+                {
+                    // New entry, just add it
+                    dest.Add(entry);
+                }
+            }
         }
 
         private static ProjectContext GetTemplatesProject(string path)

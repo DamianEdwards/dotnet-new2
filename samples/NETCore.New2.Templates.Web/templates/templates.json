@@ -1,0 +1,18 @@
+﻿{
+  "sdkVersion": "0.1",
+  "projectTemplates": {
+    "aspnetcore": {
+      "title": "ASP.NET Core",
+      "children": {
+        "empty": {
+          "title": "ASP.NET Core Empty Application",
+          "children": {
+            "csharp": {
+              "title": "ASP.NET Core Empty Application (C#)"
+            }
+          }
+        }
+      }
+    }
+  }
+}

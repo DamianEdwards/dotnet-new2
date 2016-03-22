@@ -1,0 +1,21 @@
+﻿{
+  "version": "1.0.0-*",
+
+  "compilationOptions": {
+    "emitEntryPoint": true
+  },
+
+  "dependencies": {
+    "Microsoft.AspNetCore.Server.Kestrel": "1.0.0-rc2-20270",
+    "NETStandard.Library": "1.5.0-rc2-23911"
+  },
+
+  "frameworks": {
+    "netstandardapp1.5": {
+      "imports": [
+        "dnxcore50",
+        "portable-net45+win8"
+      ]
+    }
+  }
+}

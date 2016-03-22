@@ -58,7 +58,7 @@ namespace dotnet_new2
 
                 command.OnExecute(() =>
                 {
-                    var packages = _templateManager.GetInstalledTemplates();
+                    var packages = _templateManager.GetInstalledTemplatePackages();
 
                     if (!packages.Any())
                     {
@@ -70,14 +70,15 @@ namespace dotnet_new2
                     {
                         Console.WriteLine($"{package.Id} {package.Version}");
 
-                        if (package.Templates.Any())
+                        var templates = package.GetTemplatesList();
+                        if (templates.Any())
                         {
-                            var maxNameLength = package.Templates.Max(t => t.Name.Length);
+                            var maxNameLength = templates.Max(t => t.Title.Length);
 
-                            foreach (var template in package.Templates)
+                            foreach (var template in templates)
                             {
-                                var padding = new string(' ', maxNameLength - template.Name.Length);
-                                Console.WriteLine($"  - {template.Name} {padding} [{template.Path}]");
+                                var padding = new string(' ', maxNameLength - template.Title.Length);
+                                Console.WriteLine($"  - {template.Title} {padding} [{template.Path}]");
                             }
                         }
                     }
@@ -220,33 +221,61 @@ namespace dotnet_new2
 
         private Template PromptForTemplate()
         {
-            var templates = _templateManager.GetInstalledTemplates().SelectMany(tp => tp.Templates).ToList();
+            var templatePackages = _templateManager.GetInstalledTemplatePackages().ToList();
+            var menuEntries = _templateManager.MergeManifestEntries(templatePackages);
 
-            if (templates.Count == 0)
+            if (menuEntries.Count == 0)
             {
                 return null;
             }
 
-            // TODO: Make this support template hierarchies (recursion!)
-            Console.WriteLine();
-            Console.WriteLine("Templates");
-            Console.WriteLine("-----------------------------------------");
-            
-            var maxNameLength = templates.Max(t => t.Name.Length);
+            ManifestEntry currentEntry = null;
+            Template selectedTemplate = null;
 
-            for (var i = 0; i < templates.Count; i++)
+            while (selectedTemplate == null)
             {
-                var template = templates[i];
-                var padding = new string(' ', maxNameLength - template.Name.Length);
-                Console.WriteLine($"{i+1}. {template.Name} {padding}[{template.Path}]");
+                var title = currentEntry == null ? "Templates" : currentEntry.Title + " Templates";
+                Console.WriteLine();
+                Console.WriteLine(title);
+                Console.WriteLine("-----------------------------------------");
+
+                var maxTitleLength = menuEntries.Max(e => e.Title.Length);
+
+                for (var i = 0; i < menuEntries.Count; i++)
+                {
+                    var entry = menuEntries[i];
+                    var padding = new string(' ', maxTitleLength - entry.Title.Length);
+                    Console.WriteLine($"{i + 1}. {entry.Title} {padding}[{entry.Path}]");
+                }
+
+                Console.WriteLine();
+                Console.Write($"Select a template [1]: ");
+
+                var selectedNumber = ConsoleUtils.ReadInt(menuEntries.Count);
+                currentEntry = menuEntries[selectedNumber - 1];
+                
+                var category = currentEntry as TemplateCategory;
+                if (category != null)
+                {
+                    if (category.Children.Count == 1)
+                    {
+                        var firstTemplate = category.Children.FirstOrDefault() as Template;
+                        if (firstTemplate != null)
+                        {
+                            // Only one template in this category so just pick it without prompting any further
+                            selectedTemplate = firstTemplate;
+                        }
+                    }
+
+                    menuEntries = category.Children;
+                }
+                else
+                {
+                    selectedTemplate = currentEntry as Template;
+                }
             }
 
-            Console.WriteLine();
-            Console.Write($"Select a template [1]: ");
-
-            var selection = ConsoleUtils.ReadInt(templates.Count);
-
-            return templates[selection - 1];
+            return selectedTemplate;
         }
 
         private string PromptForName()

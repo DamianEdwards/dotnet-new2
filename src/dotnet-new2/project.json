@@ -34,10 +34,6 @@
     "Microsoft.NETCore.ConsoleHost": "1.0.0-rc2-23911"
   },
 
-  "commands": {
-    "dotnet_new2": "dotnet_new2"
-  },
-
   "frameworks": {
     "netcoreapp1.0": {
       "imports": [
