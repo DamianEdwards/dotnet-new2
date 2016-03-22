@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
@@ -48,8 +47,7 @@ namespace dotnet_new2
         {
             var app = new CommandLineApplication();
             app.Name = "dotnet-new2";
-            app.Description = "The dotnet-new2 command is used to create .NET Core projects using templates installed via NuGet packages.";
-
+            app.Description = $"The {app.Name} command is used to create .NET Core projects using templates installed via NuGet packages.";
             app.HelpOption("-?|-h|--help");
 
             app.Command("list", command =>
@@ -62,7 +60,7 @@ namespace dotnet_new2
 
                     if (!packages.Any())
                     {
-                        Console.WriteLine("No templates installed. Type 'dotnet new2 install --help' for help on installing templates.");
+                        Console.WriteLine($"No templates installed. Type '{app.Name} install --help' for help on installing templates.");
                         return 0;
                     }
 
@@ -151,7 +149,7 @@ namespace dotnet_new2
                         return 1;
                     }
 
-                    Console.WriteLine("Templates restored. Type 'dotnet new2 list' to list installed templates.");
+                    Console.WriteLine($"Templates restored. Type '{app.Name} list' to list installed templates.");
                     return 0;
                 });
             });
@@ -169,7 +167,7 @@ namespace dotnet_new2
                     template = PromptForTemplate();
                     if (template == null)
                     {
-                        Console.WriteLine("No templates installed. Type 'dotnet new2 install --help' for help on installing templates.");
+                        Console.WriteLine($"No templates installed. Type '{app.Name} install --help' for help on installing templates.");
                         return 1;
                     }
                 }
@@ -178,7 +176,7 @@ namespace dotnet_new2
                     template = _templateManager.GetTemplate(templatePath);
                     if (template == null)
                     {
-                        Console.WriteLine($"The template {templatePath} wasn't found. Type 'dotnet new2 list' to list installed templates, or 'dotnet new2' to select from installed templates.");
+                        Console.WriteLine($"The template {templatePath} wasn't found. Type '{app.Name} list' to list installed templates, or '{app.Name}' to select from installed templates.");
                         return 1;
                     }
                 }
@@ -221,7 +219,13 @@ namespace dotnet_new2
 
         private Template PromptForTemplate()
         {
-            var templatePackages = _templateManager.GetInstalledTemplatePackages().ToList();
+            var templatePackages = _templateManager.GetInstalledTemplatePackages();
+
+            if (templatePackages.Count == 0)
+            {
+                return null;
+            }
+
             var menuEntries = _templateManager.MergeManifestEntries(templatePackages);
 
             if (menuEntries.Count == 0)

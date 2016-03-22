@@ -4,9 +4,9 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using Microsoft.DotNet.ProjectModel;
-using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using NuGet.Frameworks;
+using NuGet.Versioning;
 
 namespace dotnet_new2
 {
@@ -25,13 +25,32 @@ namespace dotnet_new2
 
         public TemplateManager(ProjectContext templatesProjectContext)
         {
+            if (templatesProjectContext == null)
+            {
+                throw new ArgumentNullException(nameof(templatesProjectContext));
+            }
+
             _templatesProjectContext = templatesProjectContext;
             _templatesProject = templatesProjectContext.ProjectFile;
         }
 
         public bool InstallTemplatePackage(string packageId, string version)
         {
-            // TODO: Validate the package ID and version
+            if (packageId == null)
+            {
+                throw new ArgumentNullException(nameof(packageId));
+            }
+
+            if (version == null)
+            {
+                throw new ArgumentNullException(nameof(version));
+            }
+
+            NuGetVersion nugetVersion;
+            if (!NuGetVersion.TryParse(version, out nugetVersion))
+            {
+                throw new ArgumentException($"'{version}' is an invalid package version", nameof(version));
+            }
 
             // Add the dependency to the templates project file
             var projectFile = JObject.Parse(File.ReadAllText(_templatesProject.ProjectFilePath));
@@ -67,6 +86,11 @@ namespace dotnet_new2
 
         public bool UninstallTemplatePackage(string packageId)
         {
+            if (packageId == null)
+            {
+                throw new ArgumentNullException(nameof(packageId));
+            }
+
             // Remove the dependency from the templates project file
             var projectFile = JObject.Parse(File.ReadAllText(_templatesProject.ProjectFilePath));
             var origProjectFile = projectFile.DeepClone();
@@ -136,6 +160,11 @@ namespace dotnet_new2
 
         public IList<ManifestEntry> MergeManifestEntries(IList<TemplatePackage> templatePackages)
         {
+            if (templatePackages == null)
+            {
+                throw new ArgumentNullException(nameof(templatePackages));
+            }
+
             var entries = new List<ManifestEntry>(templatePackages.First().Entries);
 
             foreach (var package in templatePackages.Skip(1))
