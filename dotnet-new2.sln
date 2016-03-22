@@ -18,6 +18,8 @@ Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "NETCore.New2.Templates", "s
 EndProject
 Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "NETCore.New2.Templates.Web", "samples\NETCore.New2.Templates.Web\NETCore.New2.Templates.Web.xproj", "{79FC750B-4D2A-486F-8E8C-754FEF525F36}"
 EndProject
+Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "NETCore.New2.Templates.Web.Mvc", "samples\NETCore.New2.Templates.Web.Mvc\NETCore.New2.Templates.Web.Mvc.xproj", "{6BF11054-44DE-446B-BD48-009AA024E641}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -34,6 +36,10 @@ Global
 		{79FC750B-4D2A-486F-8E8C-754FEF525F36}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{79FC750B-4D2A-486F-8E8C-754FEF525F36}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{79FC750B-4D2A-486F-8E8C-754FEF525F36}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6BF11054-44DE-446B-BD48-009AA024E641}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6BF11054-44DE-446B-BD48-009AA024E641}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6BF11054-44DE-446B-BD48-009AA024E641}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6BF11054-44DE-446B-BD48-009AA024E641}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -42,5 +48,6 @@ Global
 		{103C2820-3054-4D42-A8D2-629D443A832A} = {AF7EEF59-3C47-4BE1-B811-FDE44882A227}
 		{7843F585-D331-4313-9176-256893B436D1} = {5FCECAC2-00A3-4DE5-9B49-BDFDDF158304}
 		{79FC750B-4D2A-486F-8E8C-754FEF525F36} = {5FCECAC2-00A3-4DE5-9B49-BDFDDF158304}
+		{6BF11054-44DE-446B-BD48-009AA024E641} = {5FCECAC2-00A3-4DE5-9B49-BDFDDF158304}
 	EndGlobalSection
 EndGlobal

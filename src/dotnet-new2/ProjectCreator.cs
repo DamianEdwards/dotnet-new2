@@ -20,6 +20,8 @@ namespace dotnet_new2
             foreach (var file in template.Files)
             {
                 var dest = Path.Combine(path, file.DestPath);
+                var destDir = Path.GetDirectoryName(dest);
+                Directory.CreateDirectory(destDir);
 
                 File.Copy(file.SourcePath, dest);
                 ProcessFile(dest, name);

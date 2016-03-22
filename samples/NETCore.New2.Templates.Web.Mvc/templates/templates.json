@@ -1,0 +1,31 @@
+﻿{
+  "sdkVersion": "0.1",
+  "projectTemplates": {
+    "aspnetcore": {
+      "title": "ASP.NET Core",
+      "children": {
+        "mvc": {
+          "title": "ASP.NET Core MVC",
+          "children": {
+            "empty": {
+              "title": "ASP.NET Core MVC Empty Application",
+              "children": {
+                "csharp": {
+                  "title": "ASP.NET Core Empty Application (C#)"
+                }
+              }
+            },
+            "webapi": {
+              "title": "ASP.NET Core MVC Web API",
+              "children": {
+                "csharp": {
+                  "title": "ASP.NET Core Web API (C#)"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
