@@ -11,27 +11,15 @@
   },
 
   "dependencies": {
-    "NETStandard.Library": "1.5.0-rc2-23911",
-    "Newtonsoft.Json": "7.0.1",
-    "System.CommandLine": "0.1.0-e160119-1",
-    "System.Runtime.Serialization.Primitives": "4.1.1-rc2-23911",
-    "Microsoft.DotNet.ProjectModel": "1.0.0-beta-001840",
-    "Microsoft.Extensions.Logging": "1.0.0-rc2-16040",
-    "Microsoft.Extensions.Logging.Console": "1.0.0-rc2-16040",
-    "Microsoft.Extensions.PlatformAbstractions": "1.0.0-rc2-16537",
+    "Microsoft.NETCore.App": "1.0.0-rc2-*",
+    "Microsoft.DotNet.ProjectModel": "1.0.0-beta-*",
+    "Microsoft.Extensions.Logging.Console": "1.0.0-rc2-*",
     "Microsoft.Extensions.CommandLineUtils.Sources": {
       "type": "build",
-      "version": "1.0.0-rc2-16453"
+      "version": "1.0.0-rc2-*"
     },
-    "Microsoft.Dnx.Runtime.CommandParsing.Sources": {
-      "version": "1.0.0-rc2-16453",
-      "type": "build"
-    },
-    "Microsoft.Dnx.Runtime.Sources": {
-      "version": "1.0.0-rc2-16453",
-      "type": "build"
-    },
-    "Microsoft.NETCore.ConsoleHost": "1.0.0-rc2-23911"
+    "System.Runtime.Serialization.Primitives": "4.1.1-rc2-*",
+    "Newtonsoft.Json": "8.0.3"
   },
 
   "frameworks": {
